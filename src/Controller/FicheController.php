@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Fiche;
 use App\Form\FicheType;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -18,61 +18,64 @@ class FicheController extends AbstractController
     /**
      * @Route("/historique", name="fiche_acceuil")
      */
-    public function acceuilAction()
+    public function acceuilAction(PaginatorInterface $paginator, Request $request)
     {
         $repository = $this->getDoctrine()->getManager()->getRepository(Fiche::class);
 
-        $fiches = $repository->findAll();
+        $fiches = $paginator->paginate($repository->findAll());
 
-        $data = [];
-        foreach ($fiches as $key => $fiche) {
-            $data[$key]['id'] = $fiche->getId();
-            $data[$key]['signataire'] = $fiche->getSignataire();
-            $data[$key]['adresse'] = $fiche->getAdresse();
-            $data[$key]['creantier'] = $fiche->getCreantier();
-            $data[$key]['montant'] = $fiche->getMontant();
-            $data[$key]['motif'] = $fiche->getMotif();
-            $data[$key]['lieu'] = $fiche->getLieu();
-            $data[$key]['date'] = $fiche->getDate();
-        }
+        return $this->render('fiche/acceuil.html.twig', ['fiches' => $fiches]);
 
-        return new JsonResponse($data);
+        // $data = [];
+        // foreach ($fiches as $key => $fiche) {
+        //     $data[$key]['id'] = $fiche->getId();
+        //     $data[$key]['signataire'] = $fiche->getSignataire();
+        //     $data[$key]['adresse'] = $fiche->getAdresse();
+        //     $data[$key]['creantier'] = $fiche->getCreantier();
+        //     $data[$key]['montant'] = $fiche->getMontant();
+        //     $data[$key]['motif'] = $fiche->getMotif();
+        //     $data[$key]['lieu'] = $fiche->getLieu();
+        //     $data[$key]['date'] = $fiche->getDate();
+        // }
+
+        // return new JsonResponse($data);
     }
 
     /**
-     * @Route("/fiches/{date1}/{date2}", name="fiches_with_filtre" )
+     * @Route("/fiches", name="fiches_with_filtre" )
      */
-    public function fichesWithFiltre($date1, $date2)
+    public function fichesWithFiltre(PaginatorInterface $paginator, Request $request)
     {
         $repository = $this->getDoctrine()->getManager()->getRepository(Fiche::class);
 
-        // $session = new Session();
-        // $session->start();
+        $session = new Session();
+        $session->start();
 
-        // if ($request->isMethod('POST')) {
-        //     $date1 = $request->request->get('date1');
-        //     $date2 = $request->request->get('date2');
-        //     $session->set('date1', $date1);
-        //     $session->set('date2', $date2);
-        // }
-
-        // $date1 = $session->get('date1');
-        // $date2 = $session->get('date2');
-        $fiches = $repository->findFicheWithDate($date1, $date2);
-
-        $data = [];
-        foreach ($fiches as $key => $fiche) {
-            $data[$key]['id'] = $fiche->getId();
-            $data[$key]['signataire'] = $fiche->getSignataire();
-            $data[$key]['adresse'] = $fiche->getAdresse();
-            $data[$key]['creantier'] = $fiche->getCreantier();
-            $data[$key]['montant'] = $fiche->getMontant();
-            $data[$key]['motif'] = $fiche->getMotif();
-            $data[$key]['lieu'] = $fiche->getLieu();
-            $data[$key]['date'] = $fiche->getDate();
+        if ($request->isMethod('POST')) {
+            $date1 = $request->request->get('date1');
+            $date2 = $request->request->get('date2');
+            $session->set('date1', $date1);
+            $session->set('date2', $date2);
         }
 
-        return new JsonResponse($data);
+        $date1 = $session->get('date1');
+        $date2 = $session->get('date2');
+        $fiches = $paginator->paginate($repository->findFicheWithDate($date1, $date2));
+
+        return $this->render('fiche/filtre.html.twig', ['fiches' => $fiches, 'date1' => $date1, 'date2' => $date2]);
+        // $data = [];
+        // foreach ($fiches as $key => $fiche) {
+        //     $data[$key]['id'] = $fiche->getId();
+        //     $data[$key]['signataire'] = $fiche->getSignataire();
+        //     $data[$key]['adresse'] = $fiche->getAdresse();
+        //     $data[$key]['creantier'] = $fiche->getCreantier();
+        //     $data[$key]['montant'] = $fiche->getMontant();
+        //     $data[$key]['motif'] = $fiche->getMotif();
+        //     $data[$key]['lieu'] = $fiche->getLieu();
+        //     $data[$key]['date'] = $fiche->getDate();
+        // }
+
+        // return new JsonResponse($data);
     }
 
     /**
@@ -97,11 +100,11 @@ class FicheController extends AbstractController
                 $em->persist($fiche);
                 $em->flush();
 
-                return new Response('insertion reussi');
+                return $this->redirectToRoute('fiche_affiche', ['id' => $fiche->getId()]);
             }
         }
 
-        return new Response('fiche insertion');
+        return $this->render('fiche/form.html.twig', ['form' => $form->createView()]);
     }
 
     /**

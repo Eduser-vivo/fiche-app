@@ -1,0 +1,13 @@
+{% extends "base.html.twig" %}
+
+{% block navbarLi %}
+<li class="nav-item">
+    <a class="nav-link" href="{{path('fiche_acceuil' )}} ">HISTORIQUE DES FICHES</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{path('fiches_with_filtre' )}} ">LISTE DE FICHES</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{path('form_action')}} ">NOUVELLE LISTE</a>
+    </li>
+{% endblock %}

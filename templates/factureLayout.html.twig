@@ -1,0 +1,10 @@
+{% extends "base.html.twig" %}
+
+{% block navbarLi %}
+<li class="nav-item">
+    <a class="nav-link" href="{{path('factures_action' )}} ">LISTE DES FACTURES</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{path('nouvelle_facture')}} ">NOUVELLE FACTURE</a>
+</li>
+{% endblock %}

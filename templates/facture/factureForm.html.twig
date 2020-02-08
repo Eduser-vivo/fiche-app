@@ -1,0 +1,23 @@
+{% extends 'factureLayout.html.twig' %}
+
+
+{% block body %}
+	<div class="container" style="max-width: 700px;">
+		<br>
+		<h2 style="text-align: center;">
+			<strong>
+				<u>
+					NOUVELLE FACTURE
+				</u>
+			</strong>
+		</h2><br>
+		
+		{{ form_start(form, {'attr':{'novalidate':'novalidate'} } ) }}
+			<input type="submit" class="btn btn-primary btn-lg" value=" Valider "/>
+		{{ form_end(form) }}
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+
+{% endblock %}
